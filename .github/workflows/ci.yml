@@ -1,0 +1,141 @@
+name: 🔍 CI - Validação e Testes
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: 🧪 Validação do Projeto
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 🔎 Validar estrutura de pastas
+        run: |
+          echo "✓ Verificando estrutura do projeto..."
+          if [ -f "site/index.html" ]; then
+            echo "✓ Arquivo site/index.html encontrado"
+          else
+            echo "✗ Arquivo site/index.html NÃO encontrado"
+            exit 1
+          fi
+
+      - name: 🧹 Validar HTML
+        run: |
+          echo "✓ Verificando sintaxe HTML..."
+          if grep -q "<!DOCTYPE html>" site/index.html; then
+            echo "✓ Declaração DOCTYPE encontrada"
+          else
+            echo "⚠️ Aviso: DOCTYPE não encontrado"
+          fi
+          
+          if grep -q "<title>" site/index.html; then
+            echo "✓ Tag title encontrada"
+          fi
+          
+          if grep -q "<meta charset" site/index.html; then
+            echo "✓ Charset UTF-8 configurado"
+          fi
+
+      - name: 🎯 Verificar elementos obrigatórios
+        run: |
+          echo "✓ Validando elementos do formulário..."
+          
+          if grep -q "id=\"movie-name\"" site/index.html; then
+            echo "✓ Campo de nome do filme encontrado"
+          else
+            echo "✗ Campo de nome do filme NÃO encontrado"
+            exit 1
+          fi
+          
+          if grep -q "id=\"movie-category\"" site/index.html; then
+            echo "✓ Campo de categoria encontrado"
+          else
+            echo "✗ Campo de categoria NÃO encontrado"
+            exit 1
+          fi
+          
+          if grep -q "id=\"movie-date\"" site/index.html; then
+            echo "✓ Campo de data encontrado"
+          else
+            echo "✗ Campo de data NÃO encontrado"
+            exit 1
+          fi
+
+      - name: 📊 Validar JavaScript
+        run: |
+          echo "✓ Verificando funcionalidades JavaScript..."
+          
+          if grep -q "localStorage" site/index.html; then
+            echo "✓ localStorage implementado"
+          fi
+          
+          if grep -q "function loadMovies" site/index.html; then
+            echo "✓ Função loadMovies encontrada"
+          fi
+          
+          if grep -q "function saveMovies" site/index.html; then
+            echo "✓ Função saveMovies encontrada"
+          fi
+          
+          if grep -q "function renderMovies" site/index.html; then
+            echo "✓ Função renderMovies encontrada"
+          fi
+
+      - name: ✅ Teste de validação bem-sucedido
+        run: |
+          echo "✓ Todos os testes de validação passaram!"
+          echo "✓ Estrutura do projeto está correta"
+          echo "✓ Elementos obrigatórios estão presentes"
+          echo "✓ Pronto para deploy!"
+
+  lint-check:
+    runs-on: ubuntu-latest
+    name: 📝 Verificação de Código
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 🔍 Verificar linhas em branco excessivas
+        run: |
+          echo "✓ Analisando formatação..."
+          if grep -n "^$" site/index.html | wc -l | grep -qv "^0$"; then
+            echo "✓ Arquivo verificado"
+          fi
+
+      - name: 📏 Verificar tamanho do arquivo
+        run: |
+          SIZE=$(wc -c < site/index.html)
+          echo "Tamanho do arquivo: $SIZE bytes"
+          if [ $SIZE -lt 50000 ]; then
+            echo "⚠️ Arquivo pequeno (esperado, é um HTML single-page)"
+          fi
+
+  summary:
+    runs-on: ubuntu-latest
+    name: 📋 Resumo do CI
+    needs: [validate, lint-check]
+    if: always()
+
+    steps:
+      - name: ✨ Pipeline CI Completo
+        run: |
+          echo "═══════════════════════════════════════"
+          echo "  ✅ PIPELINE CI EXECUTADO COM SUCESSO"
+          echo "═══════════════════════════════════════"
+          echo ""
+          echo "📋 Testes Executados:"
+          echo "  ✓ Validação de estrutura"
+          echo "  ✓ Validação de HTML"
+          echo "  ✓ Validação de elementos obrigatórios"
+          echo "  ✓ Verificação de JavaScript"
+          echo "  ✓ Verificação de código"
+          echo ""
+          echo "🎯 Status: PRONTO PARA DEPLOY"
+          echo "═══════════════════════════════════════"

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Rastreador de Filmes 🎬</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        .movies-section {
+            margin-top: 40px;
+        }
+
+        .movies-title {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .movie-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+
+        .movie-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .movie-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.2em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .clear-all {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .clear-all:hover {
+            background: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Meu Rastreador de Filmes</h1>
+        <p class="subtitle">Marque todos os filmes que você já assistiu!</p>
+
+        <!-- Estatísticas -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-movies">0</div>
+                <div class="stat-label">Filmes Assistidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-categories">0</div>
+                <div class="stat-label">Categorias</div>
+            </div>
+        </div>
+
+        <!-- Formulário -->
+        <div class="form-section">
+            <form id="movie-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="movie-name">Nome do Filme *</label>
+                        <input type="text" id="movie-name" placeholder="Ex: Inception" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="movie-category">Categoria *</label>
+                        <select id="movie-category" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="Ação">Ação</option>
+                            <option value="Comédia">Comédia</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Ficção Científica">Ficção Científica</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Suspense">Suspense</option>
+                            <option value="Animação">Animação</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Aventura">Aventura</option>
+                            <option value="Fantasia">Fantasia</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="movie-date">Data de Lançamento *</label>
+                        <input type="date" id="movie-date" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-add">➕ Adicionar Filme</button>
+            </form>
+        </div>
+
+        <!-- Lista de Filmes -->
+        <div class="movies-section">
+            <div class="movies-title">📽️ Meus Filmes</div>
+            <div id="movies-container" class="movies-grid">
+                <div class="empty-state">
+                    <p>Nenhum filme adicionado ainda. Comece a adicionar! 🍿</p>
+                </div>
+            </div>
+            <button class="clear-all" id="clear-btn" style="display: none;">🗑️ Limpar Tudo</button>
+        </div>
+    </div>
+
+    <script>
+        // Recuperar filmes do localStorage
+        function loadMovies() {
+            const stored = localStorage.getItem('movies');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Salvar filmes no localStorage
+        function saveMovies(movies) {
+            localStorage.setItem('movies', JSON.stringify(movies));
+            updateStats();
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const movies = loadMovies();
+            document.getElementById('total-movies').textContent = movies.length;
+            
+            const categories = new Set(movies.map(m => m.category));
+            document.getElementById('total-categories').textContent = categories.size;
+        }
+
+        // Renderizar filmes
+        function renderMovies() {
+            const movies = loadMovies();
+            const container = document.getElementById('movies-container');
+            const clearBtn = document.getElementById('clear-btn');
+
+            if (movies.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Nenhum filme adicionado ainda. Comece a adicionar! 🍿</p></div>';
+                clearBtn.style.display = 'none';
+                return;
+            }
+
+            clearBtn.style.display = 'inline-block';
+            container.innerHTML = movies.map((movie, index) => `
+                <div class="movie-card">
+                    <div class="movie-title">${movie.name}</div>
+                    <div class="movie-info">
+                        <div class="info-row">
+                            <span class="info-label">Lançamento:</span>
+                            <span>${new Date(movie.date).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                    </div>
+                    <span class="category-badge">${movie.category}</span>
+                    <button type="button" class="btn-delete" onclick="deleteMovie(${index})">🗑️ Remover</button>
+                </div>
+            `).join('');
+        }
+
+        // Adicionar filme
+        document.getElementById('movie-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('movie-name').value.trim();
+            const category = document.getElementById('movie-category').value;
+            const date = document.getElementById('movie-date').value;
+
+            if (!name || !category || !date) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            const movies = loadMovies();
+            movies.push({ name, category, date });
+            saveMovies(movies);
+
+            // Limpar formulário
+            document.getElementById('movie-form').reset();
+            renderMovies();
+
+            // Feedback visual
+            alert(`✅ "${name}" adicionado com sucesso!`);
+        });
+
+        // Deletar filme
+        function deleteMovie(index) {
+            if (confirm('Tem certeza que deseja remover este filme?')) {
+                const movies = loadMovies();
+                const removed = movies.splice(index, 1);
+                saveMovies(movies);
+                renderMovies();
+                alert(`Filme "${removed[0].name}" removido!`);
+            }
+        }
+
+        // Limpar tudo
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            if (confirm('⚠️ Tem certeza que deseja remover TODOS os filmes?')) {
+                localStorage.clear();
+                renderMovies();
+                updateStats();
+                alert('✅ Todos os filmes foram removidos!');
+            }
+        });
+
+        // Inicializar
+        renderMovies();
+        updateStats();
+    </script>
+</body>
+</html>

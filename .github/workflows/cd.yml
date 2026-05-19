@@ -1,0 +1,107 @@
+name: 🚀 CD - Deploy no GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'site/**'
+      - '.github/workflows/cd.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: 🌐 Deploy no GitHub Pages
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Configurar Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: 📋 Listar arquivos para deploy
+        run: |
+          echo "📦 Arquivos que serão deployados:"
+          echo "═════════════════════════════════"
+          find site -type f -exec ls -lh {} \;
+          echo "═════════════════════════════════"
+
+      - name: 🏗️ Preparar diretório de páginas
+        run: |
+          echo "Preparando site para GitHub Pages..."
+          mkdir -p _site
+          cp -v site/* _site/
+          ls -la _site/
+
+      - name: 📤 Upload do artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: site-build
+          path: _site/
+          retention-days: 5
+
+      - name: ⚙️ Configurar GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: 📦 Upload para GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '_site'
+
+      - name: 🚀 Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+
+      - name: ✅ Deploy concluído com sucesso
+        run: |
+          echo "═════════════════════════════════════════"
+          echo "  ✅ DEPLOY REALIZADO COM SUCESSO!"
+          echo "═════════════════════════════════════════"
+          echo ""
+          echo "📍 URL do Deploy: ${{ steps.deployment.outputs.page_url }}"
+          echo ""
+          echo "🎉 Seu site está disponível em:"
+          echo "   https://aochaves.github.io/netflix/"
+          echo ""
+          echo "═════════════════════════════════════════"
+
+  notify:
+    runs-on: ubuntu-latest
+    name: 📢 Notificação de Deploy
+    needs: deploy
+    if: always()
+
+    steps:
+      - name: 📊 Resumo do Deploy
+        run: |
+          echo "╔═════════════════════════════════════════╗"
+          echo "║     🚀 RELATÓRIO DE DEPLOY (CD)         ║"
+          echo "╚═════════════════════════════════════════╝"
+          echo ""
+          echo "📅 Data: $(date '+%d/%m/%Y às %H:%M:%S')"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo "🔗 Commit: ${{ github.sha }}"
+          echo "📝 Mensagem: ${{ github.event.head_commit.message }}"
+          echo ""
+          echo "📦 Artefatos Deployados:"
+          echo "  • site/index.html"
+          echo ""
+          echo "🌐 Acessar em:"
+          echo "  https://aochaves.github.io/netflix/"
+          echo ""
+          echo "═════════════════════════════════════════"
